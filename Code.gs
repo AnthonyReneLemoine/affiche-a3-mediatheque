@@ -140,7 +140,7 @@ function buildPosterHtml(data) {
     ? '<div class="subtitle">' + escapeHtml(data.subtitle).replace(/\n/g, '<br>') + '</div>' : '';
 
   var datesHtml = data.dates
-    ? '<div class="dates"><span class="bullet">&#8226;</span><span class="date-text">' + escapeHtml(data.dates).replace(/\n/g, ' ') + '</span></div>'
+    ? '<div class="dates"><span class="date-text">' + escapeHtml(data.dates).replace(/\n/g, ' ') + '</span></div>'
     : '';
 
   var bodyLines = [];
@@ -165,6 +165,7 @@ function buildPosterHtml(data) {
     : '';
 
   var topLogo = data.topLogo || '';
+  var bottomLogo = data.bottomLogo || '';
 
   // Polices
   var ff = '';
@@ -216,21 +217,20 @@ function buildPosterHtml(data) {
 
     // === SOUS-TITRE ===
     '.subtitle{' +
-      'position:absolute;left:30mm;bottom:118.88mm;' +
-      'max-width:150mm;' +
+      'position:absolute;left:30mm;bottom:114mm;' +
+      'max-width:185mm;' +
       'font-family:"VAG Rounded Std","Arial Rounded MT Bold","Helvetica Neue",Arial,sans-serif;' +
-      'font-size:24.26pt;font-weight:700;' +
-      'line-height:1;color:#fff;z-index:4' +
+      'font-size:10.5pt;font-weight:700;' +
+      'line-height:1.25;color:#000;z-index:4' +
     '}' +
 
     // === DATES ===
     '.dates{' +
-      'position:absolute;left:154.07mm;bottom:118.88mm;' +
-      'display:flex;align-items:baseline;gap:4.88mm;' +
+      'position:absolute;left:30mm;bottom:106mm;' +
+      'max-width:190mm;' +
       'color:#fff;z-index:4' +
     '}' +
-    '.dates .bullet{font-size:16.14pt;font-weight:700;font-family:"VAG Rounded Std","Arial Rounded MT Bold","Helvetica Neue",Arial,sans-serif}' +
-    '.dates .date-text{font-size:26.65pt;font-weight:700;font-family:"Roboto","Helvetica Neue",Arial,sans-serif;text-transform:none}' +
+    '.dates .date-text{font-size:14pt;font-weight:700;font-family:"Roboto","Helvetica Neue",Arial,sans-serif;text-transform:uppercase;line-height:1.15;display:block}' +
 
     // === TEXTE PRINCIPAL ===
     '.body-text{' +
@@ -243,14 +243,14 @@ function buildPosterHtml(data) {
 
     // === TRIANGLE PUBLIC ===
     '.public-triangle{' +
-      'position:absolute;left:224.47mm;bottom:123.01mm;' +
-      'width:37.05mm;height:35.17mm;' +
+      'position:absolute;left:216mm;bottom:136mm;' +
+      'width:46mm;height:40mm;' +
       'background:#ffffff;z-index:3;' +
-      'clip-path:polygon(100% 100%,0 62.9%,70.6% 0);' +
-      '-webkit-clip-path:polygon(100% 100%,0 62.9%,70.6% 0)' +
+      'clip-path:polygon(100% 100%,0 58%,72% 0);' +
+      '-webkit-clip-path:polygon(100% 100%,0 58%,72% 0)' +
     '}' +
     '.public-text{' +
-      'position:absolute;left:233.34mm;bottom:138.4mm;' +
+      'position:absolute;left:226mm;bottom:145mm;' +
       'display:flex;flex-direction:column;gap:1.2mm;' +
       'font-family:"Roboto","Helvetica Neue",Arial,sans-serif;' +
       'font-weight:700;color:#6666ff;z-index:4' +
@@ -279,6 +279,12 @@ function buildPosterHtml(data) {
       'font-family:"Roboto","Helvetica Neue",Arial,sans-serif;' +
       'font-size:23.25pt;font-weight:700;' +
       'color:#6666ff;line-height:1' +
+    '}' +
+
+    // === LOGO GMVA ===
+    '.footer-logo{' +
+      'position:absolute;right:18mm;bottom:12mm;' +
+      'height:22mm;object-fit:contain;z-index:4' +
     '}';
 
   var html =
@@ -295,6 +301,7 @@ function buildPosterHtml(data) {
     publicHtml +
     siteUrlHtml +
     '<div class="small-triangle"></div>' +
+    (bottomLogo ? '<img class="footer-logo" src="' + bottomLogo + '" />' : '') +
 
     '</div></body></html>';
 
