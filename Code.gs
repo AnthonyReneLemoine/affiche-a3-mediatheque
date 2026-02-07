@@ -210,14 +210,13 @@ function buildPosterHtml(data) {
     '.triangle-bg{' +
       'position:absolute;inset:0;' +
       'background:#ffffff;' +
-      'clip-path:polygon(100% 0, 0 40%, 100% 100%);' +
-      '-webkit-clip-path:polygon(100% 0, 0 40%, 100% 100%)' +
+      'clip-path:polygon(100% 0, 0 100%, 100% 100%);' +
+      '-webkit-clip-path:polygon(100% 0, 0 100%, 100% 100%)' +
     '}' +
     '.triangle-text{' +
       'position:absolute;inset:0;' +
-      'display:flex;flex-direction:column;justify-content:center;align-items:flex-end;' +
-      'padding-right:4mm;' +
-      'text-align:right;' +
+      'display:flex;flex-direction:column;justify-content:center;align-items:center;' +
+      'text-align:center;' +
       'font-family:"Roboto","Helvetica Neue",Arial,sans-serif;' +
       'color:#6666ff;' +
       'line-height:1;' +
