@@ -143,16 +143,21 @@ function buildPosterHtml(data) {
     ? '<p class="dates">' + escapeHtml(data.dates).replace(/\n/g, '<br>') + '</p>' : '';
   var infosHtml = data.infos
     ? '<p class="infos">' + escapeHtml(data.infos).replace(/\n/g, '<br>') + '</p>' : '';
-  var siteUrlHtml = data.siteUrl
-    ? '<div class="site-url-box">' + escapeHtml(data.siteUrl) + '</div>' : '';
+  var siteUrlHtml = '';
 
   // Public cible
   var publicLines = (data.publicCible || '').split(/\n/).map(function(l) {
     return escapeHtml(l.trim());
   }).filter(function(l) { return l.length > 0; });
-  var publicHtml = publicLines.length > 0
-    ? '<div class="triangle-wrap"><div class="triangle-bg"></div><div class="triangle-text">' + publicLines.join('<br>') + '</div></div>'
-    : '';
+  var publicHtml = '';
+  if (publicLines.length > 0) {
+    publicHtml = '<div class="triangle-wrap"><div class="triangle-bg"></div><div class="triangle-text">';
+    publicHtml += '<span class="public-line-primary">' + publicLines[0] + '</span>';
+    if (publicLines.length > 1) {
+      publicHtml += '<span class="public-line-secondary">' + publicLines.slice(1).join(' ') + '</span>';
+    }
+    publicHtml += '</div></div>';
+  }
 
   var mainImage = data.mainImage || '';
   var topLogo = data.topLogo || '';
@@ -174,140 +179,133 @@ function buildPosterHtml(data) {
     // === POSTER ===
     '.poster{width:297mm;height:420mm;position:relative;overflow:hidden;background:#fff}' +
 
-    // === PHOTO DE FOND ===
-    // Occupe les 2/3 supérieurs, fond couvrant
+    // === PHOTO DE FOND (cadre IDML) ===
     '.image-bg{' +
-      'position:absolute;top:0;left:0;' +
-      'width:297mm;height:290mm;' +
+      'position:absolute;left:3.25mm;top:5mm;' +
+      'width:290.75mm;height:399.75mm;' +
       'background-size:cover;background-position:center center;' +
       'z-index:1' +
     '}' +
-
-    // === TRIANGLE BLANC — coin haut-droit ===
-    // Triangle rectangle : sommet haut-droit, base le long du bord droit
-    // Hypoténuse va du coin haut-gauche du triangle vers le bas-droit
-    '.triangle-wrap{' +
-      'position:absolute;top:0;right:0;' +
-      'width:140mm;height:120mm;' +
-      'z-index:5' +
-    '}' +
-    '.triangle-bg{' +
-      'position:absolute;top:0;right:0;' +
-      'width:140mm;height:120mm;' +
-      'background:#ffffff;' +
-      'clip-path:polygon(100% 0, 25% 0, 100% 100%);' +
-      '-webkit-clip-path:polygon(100% 0, 25% 0, 100% 100%)' +
-    '}' +
-    '.triangle-text{' +
-      'position:absolute;' +
-      'top:18mm;right:8mm;' +
-      'text-align:right;' +
-      'font-family:"Roboto","Helvetica Neue",Arial,sans-serif;' +
-      'font-size:22pt;font-weight:700;font-style:italic;' +
-      'color:#7c5cbf;' +
-      'line-height:1.3;' +
-      'z-index:6' +
-    '}' +
-
-    // === FOND VIOLET ZONE BASSE ===
-    // Remplit l'espace entre la photo et le footer
-    '.violet-bg{' +
-      'position:absolute;' +
-      'left:0;top:250mm;' +
-      'width:297mm;bottom:30mm;' +
-      'background:rgba(138,118,205,0.82);' +
+    '.image-overlay{' +
+      'position:absolute;left:7.89mm;top:6.39mm;' +
+      'width:280.99mm;height:402.08mm;' +
+      'background:rgba(0,0,0,0.10);' +
       'z-index:2' +
     '}' +
 
-    // === BANDEAU VIOLET SEMI-TRANSPARENT ===
-    // Superposé sur la partie basse de la photo
-    // Bord supérieur légèrement incliné, va jusqu'au footer
+    // === LOGO HAUT ===
+    '.top-logo{' +
+      'position:absolute;left:39.54mm;top:11.63mm;' +
+      'width:54mm;height:86.12mm;' +
+      'object-fit:contain;' +
+      'z-index:6' +
+    '}' +
+
+    // === TRIANGLE PUBLIC ===
+    '.triangle-wrap{' +
+      'position:absolute;left:166.57mm;top:275.67mm;' +
+      'width:37.05mm;height:35.17mm;' +
+      'z-index:12' +
+    '}' +
+    '.triangle-bg{' +
+      'position:absolute;inset:0;' +
+      'background:#ffffff;' +
+      'clip-path:polygon(100% 0, 0 40%, 100% 100%);' +
+      '-webkit-clip-path:polygon(100% 0, 0 40%, 100% 100%)' +
+    '}' +
+    '.triangle-text{' +
+      'position:absolute;inset:0;' +
+      'display:flex;flex-direction:column;justify-content:center;align-items:flex-end;' +
+      'padding-right:4mm;' +
+      'text-align:right;' +
+      'font-family:"Roboto","Helvetica Neue",Arial,sans-serif;' +
+      'color:#6666ff;' +
+      'line-height:1;' +
+      'letter-spacing:0.5pt;' +
+      'z-index:13' +
+    '}' +
+    '.triangle-text .public-line-primary{font-size:15.53pt;font-weight:700;line-height:14.5pt;}' +
+    '.triangle-text .public-line-secondary{font-size:10.35pt;font-weight:700;line-height:14.5pt;}' +
+
+    // === BANDEAU VIOLET ===
     '.content-band{' +
       'position:absolute;' +
-      'left:0;top:215mm;' +
-      'width:235mm;bottom:30mm;' +
-      'background:rgba(138,118,205,0.82);' +
-      'clip-path:polygon(0 5%,70% 0,100% 3%,100% 100%,0 100%);' +
-      '-webkit-clip-path:polygon(0 5%,70% 0,100% 3%,100% 100%,0 100%);' +
-      'z-index:10;' +
-      'padding:20mm 14mm 8mm 14mm' +
+      'left:37.35mm;top:261.04mm;' +
+      'width:235.03mm;height:83.07mm;' +
+      'background:#6666ff;' +
+      'z-index:10' +
+    '}' +
+    '.content-inner{' +
+      'position:absolute;' +
+      'left:6mm;top:16.38mm;right:1.84mm;bottom:11.84mm;' +
+      'z-index:11' +
     '}' +
 
     // === TITRE (Rias) — blanc, uppercase ===
     '.title{' +
       'font-family:"Rias","Segoe Print","Comic Sans MS",cursive;' +
-      'font-size:36pt;font-weight:700;' +
+      'font-size:47.7pt;font-weight:700;' +
       'color:#fff;' +
-      'line-height:1.0;' +
-      'margin:0 0 3mm 0;' +
+      'line-height:31.24pt;' +
+      'margin:0 0 2mm 0;' +
       'text-transform:uppercase;' +
-      'letter-spacing:0.3mm' +
+      'letter-spacing:0.2mm' +
     '}' +
     '.title-line{display:block}' +
 
-    // === SOUS-TITRE (VAG Rounded) — brun foncé ===
+    // === SOUS-TITRE (VAG Rounded) — noir ===
     '.subtitle{' +
       'font-family:"VAG Rounded Std","Arial Rounded MT Bold","Helvetica Neue",Arial,sans-serif;' +
-      'font-size:10.5pt;font-weight:700;' +
-      'color:#1a1512;' +
-      'line-height:1.25;' +
-      'margin:0 0 3mm 0' +
+      'font-size:18.86pt;font-weight:700;' +
+      'color:#000;' +
+      'line-height:18.83pt;' +
+      'margin:0 0 2mm 0' +
     '}' +
 
     // === DATES (Roboto Bold) — blanc, uppercase ===
     '.dates{' +
       'font-family:"Roboto","Helvetica Neue",Arial,sans-serif;' +
-      'font-size:14pt;font-weight:700;' +
+      'font-size:26.65pt;font-weight:700;' +
       'color:#fff;' +
-      'line-height:1.15;' +
-      'margin:0 0 2mm 0;' +
+      'line-height:14.06pt;' +
+      'margin:0 0 1mm 0;' +
       'text-transform:uppercase' +
     '}' +
 
-    // === INFOS PRATIQUES (VAG Rounded) — brun foncé ===
+    // === INFOS PRATIQUES (VAG Rounded) — noir ===
     '.infos{' +
       'font-family:"VAG Rounded Std","Arial Rounded MT Bold","Helvetica Neue",Arial,sans-serif;' +
-      'font-size:9pt;font-weight:700;' +
-      'color:#1a1512;' +
-      'line-height:1.3;' +
-      'margin:0 0 3mm 0' +
-    '}' +
-
-    // === DESCRIPTION (VAG Rounded) — brun foncé ===
-    '.description{' +
-      'font-family:"VAG Rounded Std","Arial Rounded MT Bold","Helvetica Neue",Arial,sans-serif;' +
-      'font-size:9pt;font-weight:700;' +
-      'color:#1a1512;' +
-      'line-height:1.3;' +
+      'font-size:18.86pt;font-weight:700;' +
+      'color:#000;' +
+      'line-height:18.83pt;' +
       'margin:0 0 2mm 0' +
     '}' +
 
-    // === ENCADRÉ URL ===
-    '.site-url-box{' +
-      'display:inline-block;' +
-      'font-family:"VAG Rounded Std","Arial Rounded MT Bold","Helvetica Neue",Arial,sans-serif;' +
-      'border:1.5pt solid #1a1512;' +
-      'padding:1.5mm 5mm;' +
-      'font-size:10.5pt;font-weight:700;' +
-      'color:#1a1512;' +
-      'margin-top:2mm' +
+    // === DESCRIPTION (Roboto) — blanc ===
+    '.description{' +
+      'font-family:"Roboto","Helvetica Neue",Arial,sans-serif;' +
+      'font-size:22.05pt;font-weight:700;' +
+      'color:#fff;' +
+      'line-height:14.06pt;' +
+      'margin:0 0 1mm 0' +
     '}' +
 
-    // === FOOTER ===
-    '.footer{' +
-      'position:absolute;bottom:0;left:0;' +
-      'width:297mm;height:30mm;' +
-      'background:#f0edf3;' +
-      'z-index:20;' +
-      'display:flex;justify-content:space-between;align-items:center;' +
-      'padding:0 12mm' +
-    '}' +
+    // === URL (footer) ===
     '.footer-url{' +
-      'font-size:8pt;color:#333;' +
-      'font-family:"Helvetica Neue",Helvetica,Arial,sans-serif' +
+      'position:absolute;left:47.14mm;top:347.61mm;' +
+      'font-family:"Uni Neue","Roboto","Helvetica Neue",Arial,sans-serif;' +
+      'font-size:23.49pt;font-weight:700;' +
+      'color:#6666ff;' +
+      'z-index:20' +
     '}' +
-    '.footer-url .arr{color:#7c5cbf;font-size:7pt;margin-right:1mm}' +
-    '.footer-logo{height:20mm}';
+
+    // === LOGO BAS ===
+    '.footer-logo{' +
+      'position:absolute;left:205.5mm;top:366.82mm;' +
+      'width:80.12mm;height:45.2mm;' +
+      'object-fit:contain;' +
+      'z-index:20' +
+    '}';
 
   var html =
     '<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8"><style>' + css + '</style></head><body>' +
@@ -315,28 +313,29 @@ function buildPosterHtml(data) {
 
     // Photo
     '<div class="image-bg" style="' + imageBgCss + '"></div>' +
+    '<div class="image-overlay"></div>' +
 
-    // Fond violet zone basse (remplissage entre image et footer)
-    '<div class="violet-bg"></div>' +
+    // Logo haut
+    (topLogo ? '<img class="top-logo" src="' + topLogo + '" />' : '') +
 
     // Triangle public
     publicHtml +
 
     // Bandeau violet
     '<div class="content-band">' +
+      '<div class="content-inner">' +
       '<h1 class="title">' + titleHtml + '</h1>' +
       subtitleHtml +
       datesHtml +
       infosHtml +
       descHtml +
       siteUrlHtml +
+      '</div>' +
     '</div>' +
 
-    // Footer
-    '<div class="footer">' +
-      '<div class="footer-url"><span class="arr">&#9654;</span>golfedumorbihan-vannesagglomeration.bzh</div>' +
-      (bottomLogo ? '<img class="footer-logo" src="' + bottomLogo + '" />' : '') +
-    '</div>' +
+    // URL + logo bas
+    (data.siteUrl ? '<div class="footer-url">' + escapeHtml(data.siteUrl) + '</div>' : '') +
+    (bottomLogo ? '<img class="footer-logo" src="' + bottomLogo + '" />' : '') +
 
     '</div></body></html>';
 
