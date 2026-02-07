@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Créateur d'affiches Médiathèque A3</title>
+  <style>
+    body {
+      font-family: "Helvetica Neue", Arial, sans-serif;
+      background: #f4f4f4;
+      margin: 0;
+      padding: 24px;
+    }
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      background: #fff;
+      padding: 24px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+    h1 {
+      margin-top: 0;
+      color: #5a3e9e;
+    }
+    h2 {
+      font-size: 1.1rem;
+      margin: 0 0 12px 0;
+    }
+    .grid {
+      display: grid;
+      gap: 16px;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    }
+    label {
+      font-weight: 600;
+      display: block;
+      margin-bottom: 6px;
+    }
+    input[type="text"],
+    textarea,
+    select {
+      width: 100%;
+      padding: 10px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      box-sizing: border-box;
+    }
+    textarea {
+      min-height: 80px;
+      resize: vertical;
+    }
+    .actions {
+      margin-top: 24px;
+      display: flex;
+      gap: 12px;
+    }
+    .tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+    .tab-button {
+      border: 1px solid #ddd;
+      background: #f4f4f4;
+      padding: 8px 14px;
+      border-radius: 999px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    .tab-button.active {
+      background: #8a76cd;
+      border-color: #8a76cd;
+      color: #fff;
+    }
+    .tab-panel {
+      display: none;
+    }
+    .tab-panel.active {
+      display: block;
+    }
+    .history-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 12px;
+      font-size: 0.95rem;
+    }
+    .history-table th,
+    .history-table td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: left;
+      vertical-align: top;
+    }
+    .history-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    button {
+      background: #8a76cd;
+      color: #fff;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 6px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #7360b8;
+    }
+    .result {
+      margin-top: 20px;
+      padding: 12px;
+      background: #ece8f5;
+      border-radius: 6px;
+      display: none;
+    }
+    .hint {
+      font-size: 0.9rem;
+      color: #555;
+    }
+    /* Config section (logos + polices) */
+    .config-section {
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 20px;
+      background: #fafafa;
+    }
+    .config-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+    }
+    .config-header h2 {
+      margin: 0;
+    }
+    .config-body {
+      margin-top: 12px;
+    }
+    .config-body.hidden {
+      display: none;
+    }
+    .config-row {
+      display: flex;
+      gap: 24px;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+    .config-item {
+      flex: 1;
+      min-width: 200px;
+    }
+    .logo-preview {
+      width: 80px;
+      height: 80px;
+      object-fit: contain;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      margin-top: 6px;
+      background: #eee;
+    }
+    .logo-preview.on-dark {
+      background: #333;
+    }
+    .config-status {
+      font-size: 0.85rem;
+      margin-top: 4px;
+    }
+    .config-status.ok {
+      color: #2a7d2a;
+    }
+    .config-status.missing {
+      color: #b33;
+    }
+    .font-preview {
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      padding: 10px;
+      margin-top: 8px;
+      background: #fff;
+    }
+    .font-preview .sample-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin: 0 0 4px 0;
+    }
+    .font-preview .sample-text {
+      margin: 0;
+      font-size: 0.95rem;
+    }
+    .btn-small {
+      background: #eee;
+      border: 1px solid #ccc;
+      padding: 6px 12px;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      font-weight: 600;
+      color: #333;
+    }
+    .btn-small:hover {
+      background: #ddd;
+    }
+    .section-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #5a3e9e;
+      margin: 20px 0 8px 0;
+      border-bottom: 2px solid #e8e3f0;
+      padding-bottom: 4px;
+    }
+    .config-subtitle {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #5a3e9e;
+      margin: 12px 0 8px 0;
+    }
+    .usage-hint {
+      font-size: 0.8rem;
+      color: #888;
+      margin-top: 2px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Créateur d'affiches Médiathèque A3</h1>
+    <p class="hint">Remplissez les champs pour générer une affiche Médiathèque A3 (PDF) — style bandeau violet.</p>
+
+    <div class="tabs">
+      <button class="tab-button active" data-tab="formTab" type="button">Formulaire</button>
+      <button class="tab-button" data-tab="historyTab" type="button">Historique</button>
+    </div>
+
+    <div class="tab-panel active" id="formTab">
+
+      <!-- Configuration logos + polices -->
+      <div class="config-section">
+        <div class="config-header" onclick="toggleConfig()">
+          <h2>Configuration des logos et polices</h2>
+          <span id="toggleArrow">&#9660;</span>
+        </div>
+        <div class="config-body" id="configBody">
+          <p class="hint">Uploadez les logos et polices une seule fois. Ils seront sauvegardés dans votre navigateur.</p>
+
+          <!-- Logos -->
+          <div class="config-subtitle">Logos</div>
+          <div class="config-row">
+            <div class="config-item">
+              <label>Logo Médiathèques du Golfe</label>
+              <input id="uploadLogoMediatheque" type="file" accept="image/*" />
+              <div id="statusMediatheque" class="config-status missing">Non configuré</div>
+              <img id="previewMediatheque" class="logo-preview on-dark" style="display:none;" />
+            </div>
+            <div class="config-item">
+              <label>Logo GMVA</label>
+              <input id="uploadLogoGMVA" type="file" accept="image/*" />
+              <div id="statusGMVA" class="config-status missing">Non configuré</div>
+              <img id="previewGMVA" class="logo-preview" style="display:none;" />
+            </div>
+          </div>
+
+          <!-- Polices -->
+          <div class="config-subtitle">Polices</div>
+          <div class="config-row">
+            <div class="config-item">
+              <label>Police Rias</label>
+              <input id="uploadFontRias" type="file" accept=".otf,.ttf,.woff,.woff2" />
+              <div id="statusFontRias" class="config-status missing">Non configuré</div>
+              <div class="usage-hint">→ Titre de l'affiche</div>
+              <div class="font-preview" id="previewFontRias" style="display:none;">
+                <p class="sample-title" style="font-family: 'Rias', cursive;">Rias</p>
+                <p class="sample-text" style="font-family: 'Rias', cursive;">ATELIER DE SENSIBILISATION</p>
+              </div>
+            </div>
+            <div class="config-item">
+              <label>Police Roboto Bold</label>
+              <input id="uploadFontRobotoBold" type="file" accept=".otf,.ttf,.woff,.woff2" />
+              <div id="statusFontRobotoBold" class="config-status missing">Non configuré</div>
+              <div class="usage-hint">→ Dates, public cible</div>
+              <div class="font-preview" id="previewFontRobotoBold" style="display:none;">
+                <p class="sample-title" style="font-family: 'Roboto', sans-serif; font-weight: 700;">Roboto Bold</p>
+                <p class="sample-text" style="font-family: 'Roboto', sans-serif; font-weight: 700;">SAMEDI 10 JANVIER À 10H30</p>
+              </div>
+            </div>
+            <div class="config-item">
+              <label>Police VAG Rounded Std Bold</label>
+              <input id="uploadFontVagRounded" type="file" accept=".otf,.ttf,.woff,.woff2" />
+              <div id="statusFontVagRounded" class="config-status missing">Non configuré</div>
+              <div class="usage-hint">→ Accroche, infos pratiques, URL</div>
+              <div class="font-preview" id="previewFontVagRounded" style="display:none;">
+                <p class="sample-title" style="font-family: 'VAG Rounded Std', sans-serif; font-weight: 700;">VAG Rounded Std Bold</p>
+                <p class="sample-text" style="font-family: 'VAG Rounded Std', sans-serif; font-weight: 700;">Aperçu : 0123456789 &amp; éèàç</p>
+              </div>
+            </div>
+          </div>
+
+          <button class="btn-small" onclick="clearAll()">Réinitialiser logos et polices</button>
+        </div>
+      </div>
+
+      <div class="section-title">Contenu de l'affiche</div>
+      <div class="grid">
+        <div>
+          <label for="title">Titre — ligne 1 <span class="usage-hint">(police Rias)</span></label>
+          <input id="title" type="text" required placeholder="Ex : Atelier de sensibilisation à la" />
+        </div>
+        <div>
+          <label for="titleLine2">Titre — ligne 2, optionnel <span class="usage-hint">(police Rias)</span></label>
+          <input id="titleLine2" type="text" placeholder="Ex : langue des signes" />
+        </div>
+        <div>
+          <label for="subtitle">Accroche / sous-titre <span class="usage-hint">(VAG Rounded)</span></label>
+          <textarea id="subtitle" placeholder="Ex : La Langue des Signes Française à portée de main : une découverte accessible et enrichissante en 3 séances !"></textarea>
+        </div>
+        <div>
+          <label for="description">Texte descriptif, optionnel <span class="usage-hint">(VAG Rounded)</span></label>
+          <textarea id="description" placeholder="Texte supplémentaire si besoin"></textarea>
+        </div>
+      </div>
+
+      <div class="section-title">Dates et horaires</div>
+      <div class="grid">
+        <div>
+          <label for="dates">Dates et horaires <span class="usage-hint">(Roboto Bold)</span></label>
+          <textarea id="dates" placeholder="Ex : Les samedis 10 janvier, 7 février&#10;et 21 mars, de 10h30 à 11h30"></textarea>
+        </div>
+      </div>
+
+      <div class="section-title">Informations pratiques</div>
+      <div class="grid">
+        <div>
+          <label for="infos">Infos pratiques <span class="usage-hint">(VAG Rounded)</span></label>
+          <textarea id="infos" placeholder="Ex : Sur inscription, à partir de 11 ans, engagement sur les 3 séances.&#10;Jauge de 6 personnes&#10;Médiathèque de Sarzeau - 02 97 48 29 42"></textarea>
+        </div>
+        <div>
+          <label for="publicCible">Public cible — triangle <span class="usage-hint">(Roboto Bold)</span></label>
+          <textarea id="publicCible" rows="2" placeholder="Ex : Ados&#10;Adultes"></textarea>
+        </div>
+        <div>
+          <label for="siteUrl">URL du site — encadré <span class="usage-hint">(VAG Rounded)</span></label>
+          <input id="siteUrl" type="text" value="mediathequesdugolfe.bzh" />
+        </div>
+      </div>
+
+      <div class="section-title">Visuel</div>
+      <div class="grid">
+        <div>
+          <label for="mainImage">Photo principale</label>
+          <input id="mainImage" type="file" accept="image/*" />
+        </div>
+      </div>
+
+      <input id="entryId" type="hidden" />
+      <div class="actions">
+        <button id="generate">Générer l'affiche</button>
+      </div>
+      <div class="result" id="result"></div>
+    </div>
+
+    <div class="tab-panel" id="historyTab">
+      <h2>Historique des affiches</h2>
+      <p class="hint">Cliquez sur "Recharger" pour modifier une affiche existante puis régénérez-la.</p>
+      <div class="actions">
+        <button id="refreshHistory" type="button">Actualiser l'historique</button>
+      </div>
+      <div id="historyContent"></div>
+    </div>
+  </div>
+
+  <script>
+    // ============================================================
+    // Clés localStorage
+    // ============================================================
+    var KEYS = {
+      logoMediatheque: 'med_logo_mediatheque',
+      logoGmva: 'med_logo_gmva',
+      fontRias: 'med_font_rias',
+      fontRobotoBold: 'med_font_roboto_bold',
+      fontVagRounded: 'med_font_vag_rounded'
+    };
+
+    // ============================================================
+    // Config toggle
+    // ============================================================
+    function toggleConfig() {
+      var body = document.getElementById('configBody');
+      var arrow = document.getElementById('toggleArrow');
+      if (body.classList.contains('hidden')) {
+        body.classList.remove('hidden');
+        arrow.innerHTML = '&#9660;';
+      } else {
+        body.classList.add('hidden');
+        arrow.innerHTML = '&#9654;';
+      }
+    }
+
+    // ============================================================
+    // Logo previews
+    // ============================================================
+    function loadLogoPreview(key, previewId, statusId) {
+      var data = localStorage.getItem(key);
+      var preview = document.getElementById(previewId);
+      var status = document.getElementById(statusId);
+      if (data) {
+        preview.src = data;
+        preview.style.display = 'block';
+        status.textContent = 'OK';
+        status.className = 'config-status ok';
+      } else {
+        preview.style.display = 'none';
+        status.textContent = 'Non configuré';
+        status.className = 'config-status missing';
+      }
+    }
+
+    function setupLogoUpload(inputId, storageKey, previewId, statusId) {
+      document.getElementById(inputId).addEventListener('change', function(e) {
+        var file = e.target.files[0];
+        if (!file) return;
+        var reader = new FileReader();
+        reader.onload = function() {
+          localStorage.setItem(storageKey, reader.result);
+          loadLogoPreview(storageKey, previewId, statusId);
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    // ============================================================
+    // Font management
+    // ============================================================
+    function ensureFontStyle(id) {
+      var existing = document.getElementById(id);
+      if (existing) return existing;
+      var el = document.createElement('style');
+      el.id = id;
+      document.head.appendChild(el);
+      return el;
+    }
+
+    function applyFontFace(styleId, familyName, dataUrl) {
+      var el = ensureFontStyle(styleId);
+      if (dataUrl) {
+        el.textContent = '@font-face { font-family: "' + familyName + '"; font-style: normal; font-weight: 700; src: url(' + dataUrl + '); }';
+      } else {
+        el.textContent = '';
+      }
+    }
+
+    function loadFontPreview(storageKey, previewId, statusId, styleId, familyName) {
+      var data = localStorage.getItem(storageKey);
+      var preview = document.getElementById(previewId);
+      var status = document.getElementById(statusId);
+      if (data) {
+        preview.style.display = 'block';
+        status.textContent = 'OK';
+        status.className = 'config-status ok';
+        applyFontFace(styleId, familyName, data);
+      } else {
+        preview.style.display = 'none';
+        status.textContent = 'Non configuré';
+        status.className = 'config-status missing';
+        applyFontFace(styleId, familyName, '');
+      }
+    }
+
+    function setupFontUpload(inputId, storageKey, previewId, statusId, styleId, familyName) {
+      document.getElementById(inputId).addEventListener('change', function(e) {
+        var file = e.target.files[0];
+        if (!file) return;
+        var reader = new FileReader();
+        reader.onload = function() {
+          localStorage.setItem(storageKey, reader.result);
+          loadFontPreview(storageKey, previewId, statusId, styleId, familyName);
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    // ============================================================
+    // Init previews
+    // ============================================================
+    function initAllPreviews() {
+      loadLogoPreview(KEYS.logoMediatheque, 'previewMediatheque', 'statusMediatheque');
+      loadLogoPreview(KEYS.logoGmva, 'previewGMVA', 'statusGMVA');
+      loadFontPreview(KEYS.fontRias, 'previewFontRias', 'statusFontRias', 'styleFontRias', 'Rias');
+      loadFontPreview(KEYS.fontRobotoBold, 'previewFontRobotoBold', 'statusFontRobotoBold', 'styleFontRoboto', 'Roboto');
+      loadFontPreview(KEYS.fontVagRounded, 'previewFontVagRounded', 'statusFontVagRounded', 'styleFontVag', 'VAG Rounded Std');
+    }
+
+    function clearAll() {
+      Object.values(KEYS).forEach(function(key) {
+        localStorage.removeItem(key);
+      });
+      initAllPreviews();
+    }
+
+    // Setup uploads
+    setupLogoUpload('uploadLogoMediatheque', KEYS.logoMediatheque, 'previewMediatheque', 'statusMediatheque');
+    setupLogoUpload('uploadLogoGMVA', KEYS.logoGmva, 'previewGMVA', 'statusGMVA');
+    setupFontUpload('uploadFontRias', KEYS.fontRias, 'previewFontRias', 'statusFontRias', 'styleFontRias', 'Rias');
+    setupFontUpload('uploadFontRobotoBold', KEYS.fontRobotoBold, 'previewFontRobotoBold', 'statusFontRobotoBold', 'styleFontRoboto', 'Roboto');
+    setupFontUpload('uploadFontVagRounded', KEYS.fontVagRounded, 'previewFontVagRounded', 'statusFontVagRounded', 'styleFontVag', 'VAG Rounded Std');
+    initAllPreviews();
+
+    // Collapse config si tout est configuré
+    if (localStorage.getItem(KEYS.logoMediatheque) &&
+        localStorage.getItem(KEYS.logoGmva) &&
+        localStorage.getItem(KEYS.fontRias) &&
+        localStorage.getItem(KEYS.fontRobotoBold) &&
+        localStorage.getItem(KEYS.fontVagRounded)) {
+      document.getElementById('configBody').classList.add('hidden');
+      document.getElementById('toggleArrow').innerHTML = '&#9654;';
+    }
+
+    // ============================================================
+    // Poster generation
+    // ============================================================
+    var readAsDataUrl = function(file) {
+      return new Promise(function(resolve, reject) {
+        if (!file) { resolve(''); return; }
+        var reader = new FileReader();
+        reader.onload = function() { resolve(reader.result); };
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    };
+
+    document.getElementById('generate').addEventListener('click', async function() {
+      var topLogo = localStorage.getItem(KEYS.logoMediatheque) || '';
+      var bottomLogo = localStorage.getItem(KEYS.logoGmva) || '';
+
+      var entryId = document.getElementById('entryId').value.trim();
+
+      if (entryId) {
+        var choix = prompt(
+          'Cette affiche existe déjà. Que souhaitez-vous faire ?\n\n' +
+          '1 — Écraser l\'ancienne version\n' +
+          '2 — Créer une nouvelle affiche\n\n' +
+          'Tapez 1 ou 2 :'
+        );
+        if (choix === '2') {
+          entryId = '';
+        } else if (choix !== '1') {
+          return;
+        }
+      }
+
+      var payload = {
+        entryId: entryId,
+        title: document.getElementById('title').value.trim(),
+        titleLine2: document.getElementById('titleLine2').value.trim(),
+        subtitle: document.getElementById('subtitle').value.trim(),
+        description: document.getElementById('description').value.trim(),
+        dates: document.getElementById('dates').value.trim(),
+        infos: document.getElementById('infos').value.trim(),
+        publicCible: document.getElementById('publicCible').value.trim(),
+        siteUrl: document.getElementById('siteUrl').value.trim(),
+        mainImage: await readAsDataUrl(document.getElementById('mainImage').files[0]),
+        topLogo: topLogo,
+        bottomLogo: bottomLogo,
+        fontRias: localStorage.getItem(KEYS.fontRias) || '',
+        fontRobotoBold: localStorage.getItem(KEYS.fontRobotoBold) || '',
+        fontVagRounded: localStorage.getItem(KEYS.fontVagRounded) || ''
+      };
+
+      if (!payload.title) {
+        alert('Merci de remplir au moins le titre.');
+        return;
+      }
+
+      google.script.run.withSuccessHandler(function(result) {
+        var resultEl = document.getElementById('result');
+        resultEl.style.display = 'block';
+        resultEl.innerHTML = '\u2705 Fichier PDF créé :<br />' +
+          '<a href="' + result.pdfUrl + '" target="_blank">Télécharger PDF</a>';
+        if (result.entryId) {
+          document.getElementById('entryId').value = result.entryId;
+        }
+        loadHistory();
+      }).withFailureHandler(function(error) {
+        alert('Erreur : ' + error.message);
+      }).createPoster(JSON.stringify(payload));
+    });
+
+    // ============================================================
+    // Tabs
+    // ============================================================
+    function setActiveTab(tabId) {
+      document.querySelectorAll('.tab-button').forEach(function(button) {
+        button.classList.toggle('active', button.dataset.tab === tabId);
+      });
+      document.querySelectorAll('.tab-panel').forEach(function(panel) {
+        panel.classList.toggle('active', panel.id === tabId);
+      });
+    }
+
+    document.querySelectorAll('.tab-button').forEach(function(button) {
+      button.addEventListener('click', function() {
+        setActiveTab(button.dataset.tab);
+      });
+    });
+
+    // ============================================================
+    // History
+    // ============================================================
+    function loadHistory() {
+      google.script.run.withSuccessHandler(function(entries) {
+        renderHistory(entries || []);
+      }).withFailureHandler(function(error) {
+        alert('Erreur : ' + error.message);
+      }).listPosterEntries();
+    }
+
+    function renderHistory(entries) {
+      var container = document.getElementById('historyContent');
+      if (!entries.length) {
+        container.innerHTML = '<p class="hint">Aucune affiche sauvegardée pour le moment.</p>';
+        return;
+      }
+      var rows = entries.map(function(entry) {
+        return '<tr>' +
+          '<td>' + (entry.updatedAt || '') + '</td>' +
+          '<td>' + (entry.title || '') + (entry.titleLine2 ? ' ' + entry.titleLine2 : '') + '</td>' +
+          '<td>' + (entry.publicCible || '').replace(/\n/g, ', ') + '</td>' +
+          '<td>' + (entry.pdfUrl ? '<a href="' + entry.pdfUrl + '" target="_blank">PDF</a>' : '') + '</td>' +
+          '<td class="history-actions">' +
+          '<button type="button" data-entry-id="' + entry.id + '">Recharger</button>' +
+          '</td>' +
+          '</tr>';
+      }).join('');
+      container.innerHTML = '<table class="history-table">' +
+        '<thead><tr><th>Mise à jour</th><th>Titre</th><th>Public</th><th>PDF</th><th>Actions</th></tr></thead>' +
+        '<tbody>' + rows + '</tbody></table>';
+
+      container.querySelectorAll('button[data-entry-id]').forEach(function(button) {
+        button.addEventListener('click', function() {
+          var entry = entries.find(function(item) {
+            return item.id === button.dataset.entryId;
+          });
+          if (entry) {
+            populateForm(entry);
+            setActiveTab('formTab');
+          }
+        });
+      });
+    }
+
+    function populateForm(entry) {
+      document.getElementById('entryId').value = entry.id || '';
+      document.getElementById('title').value = entry.title || '';
+      document.getElementById('titleLine2').value = entry.titleLine2 || '';
+      document.getElementById('subtitle').value = entry.subtitle || '';
+      document.getElementById('description').value = entry.description || '';
+      document.getElementById('dates').value = entry.dates || '';
+      document.getElementById('infos').value = entry.infos || '';
+      document.getElementById('publicCible').value = entry.publicCible || '';
+      document.getElementById('siteUrl').value = entry.siteUrl || '';
+    }
+
+    document.getElementById('refreshHistory').addEventListener('click', function() {
+      loadHistory();
+    });
+
+    loadHistory();
+  </script>
+</body>
+</html>
