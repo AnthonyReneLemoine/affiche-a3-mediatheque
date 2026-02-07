@@ -131,33 +131,40 @@ function findEntryRow(sheet, entryId) {
 // =============================================================
 function buildPosterHtml(data) {
   // Contenu
-  var titleLine2Html = data.titleLine2
-    ? '<span class="title-line">' + escapeHtml(data.titleLine2) + '</span>' : '';
-  var titleHtml = '<span class="title-line">' + escapeHtml(data.title) + '</span>' + titleLine2Html;
+  var titleLines = [data.title, data.titleLine2].filter(function(v) { return v; });
+  var titleHtml = titleLines.length
+    ? '<span class="title-text">' + escapeHtml(titleLines.join('\n')).replace(/\n/g, '<br>') + '</span>'
+    : '';
 
   var subtitleHtml = data.subtitle
-    ? '<p class="subtitle">' + escapeHtml(data.subtitle).replace(/\n/g, '<br>') + '</p>' : '';
-  var descHtml = data.description
-    ? '<p class="description">' + escapeHtml(data.description).replace(/\n/g, '<br>') + '</p>' : '';
+    ? '<div class="subtitle">' + escapeHtml(data.subtitle).replace(/\n/g, '<br>') + '</div>' : '';
+
   var datesHtml = data.dates
-    ? '<p class="dates">' + escapeHtml(data.dates).replace(/\n/g, '<br>') + '</p>' : '';
-  var infosHtml = data.infos
-    ? '<p class="infos">' + escapeHtml(data.infos).replace(/\n/g, '<br>') + '</p>' : '';
+    ? '<div class="dates"><span class="bullet">&#8226;</span><span class="date-text">' + escapeHtml(data.dates).replace(/\n/g, ' ') + '</span></div>'
+    : '';
+
+  var bodyLines = [];
+  if (data.description) bodyLines.push(escapeHtml(data.description));
+  if (data.infos) bodyLines.push(escapeHtml(data.infos));
+  var bodyHtml = bodyLines.length
+    ? '<div class="body-text">' + bodyLines.join('\n').replace(/\n/g, '<br>') + '</div>'
+    : '';
+
   var siteUrlHtml = data.siteUrl
-    ? '<div class="site-url-box">' + escapeHtml(data.siteUrl) + '</div>' : '';
+    ? '<div class="url-bar"><span class="url-text">' + escapeHtml(data.siteUrl) + '</span></div>' : '';
 
   // Public cible
   var publicLines = (data.publicCible || '').split(/\n/).map(function(l) {
     return escapeHtml(l.trim());
   }).filter(function(l) { return l.length > 0; });
   var publicHtml = publicLines.length > 0
-    ? '<div class="triangle-wrap"><div class="triangle-bg"></div><div class="triangle-text">' + publicLines.join('<br>') + '</div></div>'
+    ? '<div class="public-triangle"></div><div class="public-text">' +
+      '<span class="public-line main">' + publicLines[0] + '</span>' +
+      (publicLines[1] ? '<span class="public-line secondary">' + publicLines.slice(1).join(' ') + '</span>' : '') +
+      '</div>'
     : '';
 
-  var mainImage = data.mainImage || '';
   var topLogo = data.topLogo || '';
-  var bottomLogo = data.bottomLogo || '';
-  var imageBgCss = mainImage ? 'background-image: url(\'' + mainImage + '\');' : '';
 
   // Polices
   var ff = '';
@@ -174,169 +181,120 @@ function buildPosterHtml(data) {
     // === POSTER ===
     '.poster{width:297mm;height:420mm;position:relative;overflow:hidden;background:#fff}' +
 
-    // === PHOTO DE FOND ===
-    // Occupe les 2/3 supérieurs, fond couvrant
-    '.image-bg{' +
-      'position:absolute;top:0;left:0;' +
-      'width:297mm;height:290mm;' +
-      'background-size:cover;background-position:center center;' +
-      'z-index:1' +
+    // === CADRE GRIS ===
+    '.page-frame{' +
+      'position:absolute;left:7.89mm;top:6.4mm;' +
+      'width:281mm;height:402.08mm;' +
+      'background:#e6e6e6;z-index:1' +
     '}' +
 
-    // === TRIANGLE BLANC — coin haut-droit ===
-    // Triangle rectangle : sommet haut-droit, base le long du bord droit
-    // Hypoténuse va du coin haut-gauche du triangle vers le bas-droit
-    '.triangle-wrap{' +
-      'position:absolute;top:0;right:0;' +
-      'width:140mm;height:120mm;' +
-      'z-index:5' +
-    '}' +
-    '.triangle-bg{' +
-      'position:absolute;top:0;right:0;' +
-      'width:140mm;height:120mm;' +
-      'background:#ffffff;' +
-      'clip-path:polygon(100% 0, 25% 0, 100% 100%);' +
-      '-webkit-clip-path:polygon(100% 0, 25% 0, 100% 100%)' +
-    '}' +
-    '.triangle-text{' +
-      'position:absolute;' +
-      'top:18mm;right:8mm;' +
-      'text-align:right;' +
-      'font-family:"Roboto","Helvetica Neue",Arial,sans-serif;' +
-      'font-size:22pt;font-weight:700;font-style:italic;' +
-      'color:#7c5cbf;' +
-      'line-height:1.3;' +
-      'z-index:6' +
+    // === LOGO ===
+    '.top-logo{' +
+      'position:absolute;left:39.54mm;top:11.88mm;' +
+      'width:54mm;height:86.12mm;' +
+      'object-fit:contain;z-index:3' +
     '}' +
 
-    // === FOND VIOLET ZONE BASSE ===
-    // Remplit l'espace entre la photo et le footer
-    '.violet-bg{' +
-      'position:absolute;' +
-      'left:0;top:250mm;' +
-      'width:297mm;bottom:30mm;' +
-      'background:rgba(138,118,205,0.82);' +
-      'z-index:2' +
-    '}' +
-
-    // === BANDEAU VIOLET SEMI-TRANSPARENT ===
-    // Superposé sur la partie basse de la photo
-    // Bord supérieur légèrement incliné, va jusqu'au footer
+    // === BANDEAU VIOLET ===
     '.content-band{' +
-      'position:absolute;' +
-      'left:0;top:215mm;' +
-      'width:235mm;bottom:30mm;' +
-      'background:rgba(138,118,205,0.82);' +
-      'clip-path:polygon(0 5%,70% 0,100% 3%,100% 100%,0 100%);' +
-      '-webkit-clip-path:polygon(0 5%,70% 0,100% 3%,100% 100%,0 100%);' +
-      'z-index:10;' +
-      'padding:20mm 14mm 8mm 14mm' +
+      'position:absolute;left:23.85mm;top:264.04mm;' +
+      'width:235.03mm;height:83.06mm;' +
+      'background:#6666ff;z-index:2;' +
+      'clip-path:polygon(0 0,100% 21%,100% 100%,0 100%);' +
+      '-webkit-clip-path:polygon(0 0,100% 21%,100% 100%,0 100%)' +
     '}' +
 
-    // === TITRE (Rias) — blanc, uppercase ===
+    // === TITRE ===
     '.title{' +
+      'position:absolute;left:29.85mm;bottom:126.96mm;' +
+      'max-width:190mm;' +
       'font-family:"Rias","Segoe Print","Comic Sans MS",cursive;' +
-      'font-size:36pt;font-weight:700;' +
-      'color:#fff;' +
-      'line-height:1.0;' +
-      'margin:0 0 3mm 0;' +
-      'text-transform:uppercase;' +
-      'letter-spacing:0.3mm' +
+      'font-size:47.69pt;font-weight:700;' +
+      'line-height:1.0;color:#fff;text-transform:uppercase;' +
+      'z-index:4' +
     '}' +
-    '.title-line{display:block}' +
 
-    // === SOUS-TITRE (VAG Rounded) — brun foncé ===
+    // === SOUS-TITRE ===
     '.subtitle{' +
+      'position:absolute;left:30mm;bottom:118.88mm;' +
+      'max-width:150mm;' +
       'font-family:"VAG Rounded Std","Arial Rounded MT Bold","Helvetica Neue",Arial,sans-serif;' +
-      'font-size:10.5pt;font-weight:700;' +
-      'color:#1a1512;' +
-      'line-height:1.25;' +
-      'margin:0 0 3mm 0' +
+      'font-size:24.26pt;font-weight:700;' +
+      'line-height:1;color:#fff;z-index:4' +
     '}' +
 
-    // === DATES (Roboto Bold) — blanc, uppercase ===
+    // === DATES ===
     '.dates{' +
+      'position:absolute;left:154.07mm;bottom:118.88mm;' +
+      'display:flex;align-items:baseline;gap:4.88mm;' +
+      'color:#fff;z-index:4' +
+    '}' +
+    '.dates .bullet{font-size:16.14pt;font-weight:700;font-family:"VAG Rounded Std","Arial Rounded MT Bold","Helvetica Neue",Arial,sans-serif}' +
+    '.dates .date-text{font-size:26.65pt;font-weight:700;font-family:"Roboto","Helvetica Neue",Arial,sans-serif;text-transform:none}' +
+
+    // === TEXTE PRINCIPAL ===
+    '.body-text{' +
+      'position:absolute;left:29.85mm;bottom:111.24mm;' +
+      'max-width:210mm;' +
+      'font-family:"VAG Rounded Std","Arial Rounded MT Bold","Helvetica Neue",Arial,sans-serif;' +
+      'font-size:18.86pt;font-weight:700;' +
+      'line-height:1.15;color:#000;z-index:4' +
+    '}' +
+
+    // === TRIANGLE PUBLIC ===
+    '.public-triangle{' +
+      'position:absolute;left:224.47mm;bottom:123.01mm;' +
+      'width:37.05mm;height:35.17mm;' +
+      'background:#ffffff;z-index:3;' +
+      'clip-path:polygon(100% 100%,0 62.9%,70.6% 0);' +
+      '-webkit-clip-path:polygon(100% 100%,0 62.9%,70.6% 0)' +
+    '}' +
+    '.public-text{' +
+      'position:absolute;left:233.34mm;bottom:138.4mm;' +
+      'display:flex;flex-direction:column;gap:1.2mm;' +
       'font-family:"Roboto","Helvetica Neue",Arial,sans-serif;' +
-      'font-size:14pt;font-weight:700;' +
-      'color:#fff;' +
-      'line-height:1.15;' +
-      'margin:0 0 2mm 0;' +
-      'text-transform:uppercase' +
+      'font-weight:700;color:#6666ff;z-index:4' +
+    '}' +
+    '.public-text .public-line.main{font-size:15.53pt}' +
+    '.public-text .public-line.secondary{font-size:10.35pt}' +
+
+    // === TRIANGLE DÉCORATIF ===
+    '.small-triangle{' +
+      'position:absolute;left:50.18mm;bottom:52.81mm;' +
+      'width:8.19mm;height:8.54mm;' +
+      'background:#6666ff;z-index:3;' +
+      'clip-path:polygon(100% 100%,0 49.7%,86.1% 0);' +
+      '-webkit-clip-path:polygon(100% 100%,0 49.7%,86.1% 0)' +
     '}' +
 
-    // === INFOS PRATIQUES (VAG Rounded) — brun foncé ===
-    '.infos{' +
-      'font-family:"VAG Rounded Std","Arial Rounded MT Bold","Helvetica Neue",Arial,sans-serif;' +
-      'font-size:9pt;font-weight:700;' +
-      'color:#1a1512;' +
-      'line-height:1.3;' +
-      'margin:0 0 3mm 0' +
+    // === BANDE URL ===
+    '.url-bar{' +
+      'position:absolute;left:23.85mm;bottom:59.83mm;' +
+      'width:119.46mm;height:13.61mm;' +
+      'background:#000;z-index:3;' +
+      'display:flex;align-items:center;' +
+      'padding-left:9.8mm' +
     '}' +
-
-    // === DESCRIPTION (VAG Rounded) — brun foncé ===
-    '.description{' +
-      'font-family:"VAG Rounded Std","Arial Rounded MT Bold","Helvetica Neue",Arial,sans-serif;' +
-      'font-size:9pt;font-weight:700;' +
-      'color:#1a1512;' +
-      'line-height:1.3;' +
-      'margin:0 0 2mm 0' +
-    '}' +
-
-    // === ENCADRÉ URL ===
-    '.site-url-box{' +
-      'display:inline-block;' +
-      'font-family:"VAG Rounded Std","Arial Rounded MT Bold","Helvetica Neue",Arial,sans-serif;' +
-      'border:1.5pt solid #1a1512;' +
-      'padding:1.5mm 5mm;' +
-      'font-size:10.5pt;font-weight:700;' +
-      'color:#1a1512;' +
-      'margin-top:2mm' +
-    '}' +
-
-    // === FOOTER ===
-    '.footer{' +
-      'position:absolute;bottom:0;left:0;' +
-      'width:297mm;height:30mm;' +
-      'background:#f0edf3;' +
-      'z-index:20;' +
-      'display:flex;justify-content:space-between;align-items:center;' +
-      'padding:0 12mm' +
-    '}' +
-    '.footer-url{' +
-      'font-size:8pt;color:#333;' +
-      'font-family:"Helvetica Neue",Helvetica,Arial,sans-serif' +
-    '}' +
-    '.footer-url .arr{color:#7c5cbf;font-size:7pt;margin-right:1mm}' +
-    '.footer-logo{height:20mm}';
+    '.url-text{' +
+      'font-family:"Roboto","Helvetica Neue",Arial,sans-serif;' +
+      'font-size:23.25pt;font-weight:700;' +
+      'color:#6666ff;line-height:1' +
+    '}';
 
   var html =
     '<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8"><style>' + css + '</style></head><body>' +
     '<div class="poster">' +
 
-    // Photo
-    '<div class="image-bg" style="' + imageBgCss + '"></div>' +
-
-    // Fond violet zone basse (remplissage entre image et footer)
-    '<div class="violet-bg"></div>' +
-
-    // Triangle public
+    '<div class="page-frame"></div>' +
+    (topLogo ? '<img class="top-logo" src="' + topLogo + '" />' : '') +
+    '<div class="content-band"></div>' +
+    (titleHtml ? '<div class="title">' + titleHtml + '</div>' : '') +
+    subtitleHtml +
+    datesHtml +
+    bodyHtml +
     publicHtml +
-
-    // Bandeau violet
-    '<div class="content-band">' +
-      '<h1 class="title">' + titleHtml + '</h1>' +
-      subtitleHtml +
-      datesHtml +
-      infosHtml +
-      descHtml +
-      siteUrlHtml +
-    '</div>' +
-
-    // Footer
-    '<div class="footer">' +
-      '<div class="footer-url"><span class="arr">&#9654;</span>golfedumorbihan-vannesagglomeration.bzh</div>' +
-      (bottomLogo ? '<img class="footer-logo" src="' + bottomLogo + '" />' : '') +
-    '</div>' +
+    siteUrlHtml +
+    '<div class="small-triangle"></div>' +
 
     '</div></body></html>';
 
